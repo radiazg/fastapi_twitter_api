@@ -1,1 +1,1 @@
-[]
+[{"password": "password", "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "email": "ricardo@example.com", "first_name": "Ricardo", "last_name": "Diaz", "birth_date": "2021-11-25"}, {"password": "password", "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "email": "catalina@example.com", "first_name": "catalina", "last_name": "Castro", "birth_date": "2021-11-25"}, {"password": "password", "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa7", "email": "laura@example.com", "first_name": "Laura", "last_name": "Higuita", "birth_date": "2021-11-25"}]

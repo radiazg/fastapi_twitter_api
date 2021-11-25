@@ -2,6 +2,7 @@
 from uuid import UUID
 from datetime import date, datetime
 from typing import Optional, List
+import json
 
 # Pydantic
 from pydantic import BaseModel
@@ -10,6 +11,7 @@ from pydantic import EmailStr, Field
 # FastAPI
 from fastapi import FastAPI
 from fastapi import status
+from fastapi import Body
 
 
 app = FastAPI()
@@ -70,24 +72,44 @@ class Tweet(BaseModel):
     summary="Register a User",
     tags=["Users"]
 )
-def signup():
+def signup(
+    user: UserRegister = Body(...)
+):
     """
     ## Signup a User
 
     This path operation register a user in the app
 
-    Parameters
-        - Request body parameter
-            - user: UserRegister
+    **Parameters**
+
+    - Request body parameter
+        - user: UserRegister
 
     Return a json with the basic user information:
-        - user_id: UUID
-        - email: EmailStr
-        - first_name: str
-        - last_name: str
-        - birth_date: date
+
+    - user_id: UUID
+    - email: EmailStr
+    - first_name: str
+    - last_name: str
+    - birth_date: date
     """
-    
+    #open file user.jason in read/write mode with utf-8 encoding
+    with open("users.json", "r+", encoding="utf-8") as f:
+        # read file and take the string and transfor as json and loda in result
+        results = json.loads(f.read())
+        # transform the request body in dictionary and save in variable dict
+        user_dict = user.dict()
+        # user_id and birth_date as not string and use cast for transform in dict
+        user_dict["user_id"] = str(user_dict["user_id"])
+        user_dict["birth_date"] = str(user_dict["birth_date"])
+        # add user dictionary to results variable
+        results.append(user_dict)
+
+        # move the firts line in file
+        f.seek(0)
+        # write in the file and transform a list of dict -results- an a json
+        f.write(json.dumps(results))
+        return user
 
 ### Login a user
 @app.post(
