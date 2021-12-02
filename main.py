@@ -11,7 +11,7 @@ from pydantic import EmailStr, Field
 # FastAPI
 from fastapi import FastAPI
 from fastapi import status
-from fastapi import Body
+from fastapi import Body, Query, From, Path
 
 
 app = FastAPI()
@@ -28,7 +28,10 @@ class PasswordMixin(BaseModel):
 
 class UserBase(BaseModel):
     user_id: UUID = Field(...)
-    email: EmailStr = Field(...)
+    email: EmailStr = Field(
+        ..., 
+        example='ricardo@exmaple.com'
+    )
 
 class UserLogin(UserBase, PasswordMixin):
     pass
@@ -37,12 +40,14 @@ class User(UserBase):
     first_name: str = Field(
         ...,
         min_length=1,
-        max_length=50
+        max_length=50,
+        example='Ricardo'
     )
     last_name: str = Field(
         ...,
         min_length=1,
-        max_length=50
+        max_length=50,
+        example='Diaz'
     )
     birth_date: Optional[date] = Field(default=None)
 
@@ -54,7 +59,8 @@ class Tweet(BaseModel):
     content: str = Field(
         ...,
         min_length=1,
-        max_length=256
+        max_length=256,
+        example='This tweet is a example for FastAPI'
     )
     created_at: datetime = Field(default=datetime.now())
     updated_at: Optional[datetime] = Field(default=None)
@@ -121,6 +127,25 @@ def signup(
     tags=["Users"]
 )
 def login():
+    """
+    ## login a User
+
+    This path operation login a user in the app
+
+    **Parameters**
+
+    - Request Form parameter
+        - username: srt -> A user name
+        - password: str -> A password for user name
+
+    Return a json with the basic user information:
+
+    - user_id: UUID
+    - email: EmailStr
+    - first_name: str
+    - last_name: str
+    - birth_date: date
+    """
     pass
 
 ### Show all users
@@ -197,7 +222,31 @@ def update_a_user():
     tags=["Tweet"]
 )
 def home():
-    return {"Twitter API": "Working"}
+    """
+    ## Show all tweets
+
+    This path operation show all tweets in the app
+
+    **Parameters**
+
+    - 
+
+    Return a json list with all tweets in the app with following keys:
+
+    - tweet_id: UUID
+    - content: str
+    - created_at: datetime
+    - updated_at: datetime
+    - by: User
+        - user_id: UUID
+        - email: EmailStr
+        - first_name: str
+        - last_name: str
+        - birth_date: date
+    """
+    with open("tweets.json", "r", encoding="utf-8") as f:
+        results = json.loads(f.read())
+        return results
 
 ### Post a tweet
 @app.post(
