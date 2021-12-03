@@ -12,6 +12,7 @@ from pydantic import EmailStr, Field
 from fastapi import FastAPI
 from fastapi import status
 from fastapi import Body, Query, Form, Path
+from fastapi import HTTPException
 
 
 app = FastAPI()
@@ -126,7 +127,10 @@ def signup(
     summary="Login a User",
     tags=["Users"]
 )
-def login():
+def login(
+    login_email: EmailStr = Form(...),
+    login_password: str = Form(...)
+):
     """
     ## login a User
 
@@ -135,8 +139,8 @@ def login():
     **Parameters**
 
     - Request Form parameter
-        - username: srt -> A user name
-        - password: str -> A password for user name
+        - user mail: EmailStr -> A user mail
+        - password: str -> A password for user mail
 
     Return a json with the basic user information:
 
@@ -146,7 +150,32 @@ def login():
     - last_name: str
     - birth_date: date
     """
-    pass
+    # open file user.json in read mode with utf-8 encoding
+    results = read_file(model='users')
+    # status user
+    #  1 - user and password are correct
+    #  2 - User exists but password incorrect
+    #  3 - user not exits
+    user_status = 3
+    for user in results:
+        if user['email'] == login_email:
+            user_status = 2
+            if user['password'] == login_password:
+                user_status = 1
+                user_result = user
+
+    if user_status == 1:
+        return  user_result
+    elif user_status == 2:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="¡The Password is incorrect!"
+        )
+    elif user_status == 3:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="¡This user does not exists!"
+        )
 
 ### Show all users
 @app.get(
@@ -174,9 +203,8 @@ def show_all_users():
     - last_name: str
     - birth_date: date
     """
-    with open("users.json", "r", encoding="utf-8") as f:
-        results = json.loads(f.read())
-        return results
+    results = read_file(model='users')
+    return results
 
 ### Show a user
 @app.get(
@@ -186,8 +214,51 @@ def show_all_users():
     summary="Show a user",
     tags=["Users"]
 )
-def show_a_user():
-    pass
+def show_a_user(
+    user_id: str = Path(
+        ...,
+        title="User ID",
+        min_length=1,
+        description="This is a User ID, It's required",
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa8"
+    )
+):
+    """
+    ## show a user
+
+    This path operation show a user in the app
+
+    **Parameters**
+
+    - Request Path Parameter
+        - user_id: UUID -> User ID
+
+    Return a json with the basic user information:
+
+    - user_id: UUID
+    - email: EmailStr
+    - first_name: str
+    - last_name: str
+    - birth_date: date
+    """
+    #open file user.json in read mode with utf-8 encoding
+    results = read_file(model='users')
+    # status user
+    #  1 - user exists
+    #  2 - user not exits
+    user_status = 2
+    for user in results:
+        if user['user_id'] == user_id:
+            user_status = 1
+            user_result = user
+
+    if user_status == 1:
+        return  user_result
+    elif user_status == 2:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="¡This user does not exists!"
+        )
 
 ### Delete a user
 @app.delete(
@@ -244,9 +315,8 @@ def home():
         - last_name: str
         - birth_date: date
     """
-    with open("tweets.json", "r", encoding="utf-8") as f:
-        results = json.loads(f.read())
-        return results
+    results = read_file(model='tweets')
+    return results
 
 ### Post a tweet
 @app.post(
@@ -331,3 +401,24 @@ def delete_a_tweet():
 )
 def update_a_tweet():
     pass
+
+## Aditional functions
+
+### read a files
+def read_file(model: str):
+    """
+    ## Read File JSON
+
+    This fuction read a file .json
+
+    **Parameters**
+
+    - Name model : str
+
+    Return a json
+    """
+    #open file .json in read mode with utf-8 encoding
+    with open(model + '.json', 'r', encoding='utf-8') as f:
+        # read file and take the string and transform as json and loda in result
+        results = json.loads(f.read())
+        return results
