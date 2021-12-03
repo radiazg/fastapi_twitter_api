@@ -11,7 +11,7 @@ from pydantic import EmailStr, Field
 # FastAPI
 from fastapi import FastAPI
 from fastapi import status
-from fastapi import Body, Query, From, Path
+from fastapi import Body, Query, Form, Path
 
 
 app = FastAPI()
