@@ -22,5 +22,21 @@
         "first_name": "Laura",
         "last_name": "Higuita",
         "birth_date": "2021-11-25"
+    },
+    {
+        "password": "password",
+        "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa3",
+        "email": "andres@exmaple.com",
+        "first_name": "Andres",
+        "last_name": "Diaz",
+        "birth_date": "2021-12-09"
+    },
+    {
+        "password": "password",
+        "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa4",
+        "email": "bruno@exmaple.com",
+        "first_name": "Bruno",
+        "last_name": "Diaz",
+        "birth_date": "2021-12-09"
     }
 ]
