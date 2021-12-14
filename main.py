@@ -313,7 +313,7 @@ def delete_a_user(
         f.seek(0)
         # write in the file and transform a list of dict -results- an a json
         f.write(json.dumps(results))
-        
+
     if user_status == 1:
         return user
     elif user_status == 2:
@@ -330,8 +330,79 @@ def delete_a_user(
     summary="Update a user",
     tags=["Users"]
 )
-def update_a_user():
-    pass
+def update_a_user(
+    user_id: str = Path(
+        ...,
+        title="User ID",
+        min_length=1,
+        description="This is a User ID, It's required",
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa4"
+    ),
+    first_name: str = Form(
+        ...,
+        title="First Name",
+        description="The first name of the user",
+        example="Carlos"
+    ),
+    last_name: str = Form(
+        ...,
+        title="Last Name",
+        description="The last name of the user",
+        example="Oliveira"
+    ),
+    email: EmailStr = Form(
+        ...,
+        title="Email",
+        description="The email of the user",
+        example="carlos@example.com"
+    )
+):
+    """
+    ## Update a user
+
+    This path operation update a user in the app
+
+    **Parameters**
+
+    - Request Path Parameter
+        - user_id: Str -> User ID
+
+    Return a json with the basic user information updated:
+
+    - user_id: Str
+    - email: EmailStr
+    - first_name: str
+    - last_name: str
+    - birth_date: date
+    """
+    #open file user.json in read/write mode with utf-8 encoding
+    with open("users.json", "r+", encoding="utf-8") as f:
+        # read file and take the string and transform as json and loda in result
+        results = json.loads(f.read())
+        # status user
+        #  1 - user exists
+        #  2 - user not exits
+        user_status = 2
+        for user in results:
+            if user['user_id'] == user_id:
+                user_status = 1
+                user['first_name'] = first_name
+                user['last_name'] = last_name
+                user['email'] = email
+                user_result = user
+        # move the firts line in file
+        f.truncate(0)
+        f.seek(0)
+        # write in the file and transform a list of dict -results- an a json
+        f.write(json.dumps(results))
+
+    if user_status == 1:
+        return user_result
+    elif user_status == 2:
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="¡This user does not exists!"
+    )
 
 ## Tweets
 
