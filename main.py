@@ -486,6 +486,7 @@ def post(tweet: Tweet = Body(...)):
         results.append(tweet_dict)
 
         # move the firts line in file
+        f.truncate(0)
         f.seek(0)
         # write in the file and transform a list of dict -results- an a json
         f.write(json.dumps(results))
@@ -499,8 +500,51 @@ def post(tweet: Tweet = Body(...)):
     summary="Show a tweet",
     tags=["Tweet"]
 )
-def show_a_tweet():
-    pass
+def show_a_tweet(
+    tweet_id: str = Path(
+        ...,
+        title="Tweet ID",
+        min_length=1,
+        description="This is a tweet ID, It's required",
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa1"
+    )
+):
+    """
+    ## show a tweet
+
+    This path operation show a tweet in the app
+
+    **Parameters**
+
+    - Request Path Parameter
+        - tweet_id: str -> Tweet ID
+
+    Return a json with the basic tweet information:
+
+    - tweet_id: str
+    - content: str
+    - created_at: datetime
+    - updated_at: datetime
+    - by: User
+    """
+    #open file tweets.json in read mode with utf-8 encoding
+    results = read_file(model='tweets')
+    # tweet status
+    #  1 - tweet exists
+    #  2 - tweet not exits
+    tweet_status = 2
+    for tweet in results:
+        if tweet['tweet_id'] == tweet_id:
+            tweet_status = 1
+            tweet_result = tweet
+
+    if tweet_status == 1:
+        return  tweet_result
+    elif tweet_status == 2:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="¡This tweet does not exists!"
+        )
 
 ### Delete a tweet
 @app.delete(
@@ -510,8 +554,59 @@ def show_a_tweet():
     summary="Delete a tweet",
     tags=["Tweet"]
 )
-def delete_a_tweet():
-    pass
+def delete_a_tweet(
+    tweet_id: str = Path(
+        ...,
+        title="Tweet ID",
+        min_length=1,
+        description="This is a tweet ID, It's required",
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa9"
+    )
+):
+    """
+    ## delete a tweet
+
+    This path operation delete a tweet in the app
+
+    **Parameters**
+
+    - Request Path Parameter
+        - tweet_id: str -> Tweet ID
+
+    Return a json with the basic tweet information deleted:
+
+    - tweet_id: str
+    - content: str
+    - created_at: datetime
+    - updated_at: datetime
+    - by: User
+    """
+    #open file tweets.json in read/write mode with utf-8 encoding
+    with open("tweets.json", "r+", encoding="utf-8") as f:
+        # read file and take the string and transform as json and loda in result
+        results = json.loads(f.read())
+        # tweet status
+        #  1 - tweet exists
+        #  2 - tweet not exits
+        tweet_status = 2
+        for tweet in results:
+            if tweet['tweet_id'] == tweet_id:
+                tweet_status = 1
+                tweet_result = tweet
+                results.remove(tweet)
+        # move the firts line in file
+        f.truncate(0)
+        f.seek(0)
+        # write in the file and transform a list of dict -results- an a json
+        f.write(json.dumps(results))
+
+    if tweet_status == 1:
+        return tweet_result
+    elif tweet_status == 2:
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="¡This tweet does not exists!"
+    )
 
 ### Update a tweet
 @app.put(
@@ -521,8 +616,68 @@ def delete_a_tweet():
     summary="Update a tweet",
     tags=["Tweet"]
 )
-def update_a_tweet():
-    pass
+def update_a_tweet(
+    tweet_id: str = Path(
+        ...,
+        title="Tweet ID",
+        min_length=1,
+        description="This is a tweet ID, It's required",
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa9"
+    ),
+    content: str = Form(
+        ...,
+        title="Content tweet",
+        description="The content of tweet",
+        example="This tweet has been updated"
+    )
+):
+    """
+    ## update a tweet
+
+    This path operation update a tweet in the app
+
+    **Parameters**
+
+    - Request Path Parameter
+        - tweet_id: str -> Tweet ID
+    - Request Form Parameter
+        - content: str -> Content of tweet
+
+    Return a json with the basic tweet information updated:
+
+    - tweet_id: str
+    - content: str
+    - created_at: datetime
+    - updated_at: datetime
+    - by: User
+    """
+    #open file tweets.json in read/write mode with utf-8 encoding
+    with open("tweets.json", "r+", encoding="utf-8") as f:
+        # read file and take the string and transform as json and loda in result
+        results = json.loads(f.read())
+        # tweet status
+        #  1 - tweet exists
+        #  2 - tweet not exits
+        tweet_status = 2
+        for tweet in results:
+            if tweet['tweet_id'] == tweet_id:
+                tweet_status = 1
+                tweet['content'] = content
+                tweet['updated_at'] = str(datetime.now())
+                tweet_result = tweet
+        # move the firts line in file
+        f.truncate(0)
+        f.seek(0)
+        # write in the file and transform a list of dict -results- an a json
+        f.write(json.dumps(results))
+
+    if tweet_status == 1:
+        return tweet_result
+    elif tweet_status == 2:
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="¡This tweet does not exists!"
+    )
 
 ## Aditional functions
 
