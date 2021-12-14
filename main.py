@@ -114,10 +114,11 @@ def signup(
         results.append(user_dict)
 
         # move the firts line in file
+        f.truncate(0)
         f.seek(0)
         # write in the file and transform a list of dict -results- an a json
         f.write(json.dumps(results))
-        return user
+    return user
 
 ### Login a user
 @app.post(
@@ -308,17 +309,18 @@ def delete_a_user(
                 user_status = 1
                 results.remove(user)
         # move the firts line in file
+        f.truncate(0)
         f.seek(0)
         # write in the file and transform a list of dict -results- an a json
         f.write(json.dumps(results))
         
-        if user_status == 1:
-            return user
-        elif user_status == 2:
-            raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="¡This user does not exists!"
-        )
+    if user_status == 1:
+        return user
+    elif user_status == 2:
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="¡This user does not exists!"
+    )
 
 ### Update a user
 @app.put(
@@ -467,7 +469,9 @@ def read_file(model: str):
     Return a json
     """
     #open file .json in read mode with utf-8 encoding
-    with open(model + '.json', 'r', encoding='utf-8') as f:
-        # read file and take the string and transform as json and loda in result
-        results = json.loads(f.read())
-        return results
+    f = open(model + '.json', 'r', encoding='utf-8')
+    
+    # read file and take the string and transform as json and load in result
+    results = json.loads(f.read())
+    f.close()
+    return results
